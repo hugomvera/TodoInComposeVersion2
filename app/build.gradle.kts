@@ -6,11 +6,11 @@ plugins {
 }
 
 android {
-    namespace = "com.example.todoincomposeversion2"
+    namespace = "com.blacksnowymanx.todoincomposeversion2"
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "com.example.todoincomposeversion2"
+        applicationId = "com.blacksnowymanx.todoincomposeversion2"
         minSdk = 24
         targetSdk = 35
         versionCode = 1
