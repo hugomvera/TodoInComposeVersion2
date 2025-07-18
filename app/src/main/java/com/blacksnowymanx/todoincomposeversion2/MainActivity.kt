@@ -44,6 +44,9 @@ import com.blacksnowymanx.todoincomposeversion2.viewmodel.TaskViewModel
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.ui.Alignment
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.rememberNavController
+import com.blacksnowymanx.Navigation.SetupNavGraph
 
 class MainActivity : ComponentActivity() {
     //this is where our taskViewModel is at
@@ -52,25 +55,49 @@ class MainActivity : ComponentActivity() {
     }
 
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        
+    lateinit var navController: NavHostController
 
-        
+
+    override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
             TodoInComposeVersion2Theme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Greeting(
-                        name = "Android",
-                        modifier = Modifier.padding(innerPadding),
-                        taskViewModel
-                    )
-                }
+                val navController = rememberNavController()
+                SetupNavGraph(navController = navController)
             }
         }
     }
-}
+
+//    override fun onCreate(savedInstanceState: Bundle?) {
+//
+//
+//
+//        super.onCreate(savedInstanceState)
+//        enableEdgeToEdge()
+//        setContent {
+//            TodoInComposeVersion2Theme {
+//
+//
+//                    //will place the navigation controller here
+//
+//                    navController = rememberNavController()
+//                    SetupNavGraph(navController = navController)
+
+//                    Greeting(
+//                        name = "Android",
+//                        modifier = Modifier.padding(innerPadding),
+//                        taskViewModel
+//
+//            }
+//        }
+//    }
+//}
+
+
+
+
+
 @Composable
 fun Greeting(name: String, modifier: Modifier = Modifier,taskViewModel: TaskViewModel) {
     val context = LocalContext.current
@@ -272,6 +299,6 @@ fun TaskCard(task: Task,onCheckedChange: (Boolean) -> Unit = {},onThrashCancle: 
 
     }
 
-}
+}}
 
 
