@@ -48,6 +48,9 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.blacksnowymanx.Navigation.SetupNavGraph
 
+
+
+
 class MainActivity : ComponentActivity() {
     //this is where our taskViewModel is at
     private val taskViewModel: TaskViewModel by viewModels {
@@ -119,7 +122,12 @@ fun Greeting(name: String, modifier: Modifier = Modifier,taskViewModel: TaskView
     Log.d("TaskApp", taskViewModel.allTasks.toString())
 
 
+
+    // This is were we place the Top margin so it does not get in the way of the camera
     val padding = 25.dp
+
+    //in this column there will be a button and input field where we will add a button and then input field
+
     Column(
         modifier = Modifier
             .fillMaxSize()
