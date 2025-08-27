@@ -47,11 +47,17 @@ import androidx.compose.ui.Alignment
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.blacksnowymanx.Navigation.SetupNavGraph
+import com.blacksnowymanx.todoincomposeversion2.roomListNames.ListNameViewModel
+import com.blacksnowymanx.todoincomposeversion2.roomListNames.ListNameViewModelFactory
 
 class MainActivity : ComponentActivity() {
     //this is where our taskViewModel is at
     private val taskViewModel: TaskViewModel by viewModels {
         TaskViewModelFactory(TaskDatabase.getDatabase(this).taskDao())
+    }
+
+    private val listNameViewModel: ListNameViewModel by viewModels {
+        ListNameViewModelFactory(TaskDatabase.getDatabase(this).listNameDao())
     }
 
 
@@ -64,7 +70,7 @@ class MainActivity : ComponentActivity() {
         setContent {
                 TodoInComposeVersion2Theme{
                     val navController = rememberNavController()
-                    SetupNavGraph(navController = navController,taskViewModel)
+                    SetupNavGraph(navController = navController,taskViewModel,listNameViewModel)
                 }
         }
     }

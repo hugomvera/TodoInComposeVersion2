@@ -7,6 +7,6 @@ import androidx.room.PrimaryKey
 data class Task(
     @PrimaryKey(autoGenerate = true) val id: Int = 0, // Auto-incremented ID
     val title: String,                                 // Task title
-    val description: String,                          // Task description
+    val listName: String,                          // Task description
     val isCompleted: Boolean                          // Task completion status
 )

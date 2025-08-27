@@ -13,4 +13,7 @@ interface TaskDao {
     suspend fun delete(task: Task) // Delete a task.
     @Query("SELECT * FROM tasks ORDER BY id DESC")
     fun getAllTasks(): LiveData<List<Task>> // Fetch all tasks.
+
+    //this will list the names of the lists and remove duplicates
+
 }

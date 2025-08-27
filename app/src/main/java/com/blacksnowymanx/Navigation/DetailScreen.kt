@@ -1,6 +1,6 @@
 package com.blacksnowymanx.Navigation
 
-
+import androidx.compose.runtime.livedata.observeAsState
 import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.layout.Column
@@ -17,30 +17,55 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Button
-import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
-import com.blacksnowymanx.todoincomposeversion2.R
-import com.blacksnowymanx.todoincomposeversion2.room.Task
+import com.blacksnowymanx.todoincomposeversion2.roomListNames.ListName
+import com.blacksnowymanx.todoincomposeversion2.roomListNames.ListNameViewModel
 import com.blacksnowymanx.todoincomposeversion2.viewmodel.TaskViewModel
+import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.res.painterResource
+import com.blacksnowymanx.todoincomposeversion2.room.Task
 
+import kotlin.toString
+
+//TODO need to comment
 @Composable
-fun DetailScreen(navController: NavHostController, taskViewModel: TaskViewModel){
+fun DetailScreen(
+    navController: NavHostController,
+    taskViewModel: TaskViewModel,
+    listNameViewModel: ListNameViewModel,
+    id: Int
+){
+
+    //val name by listNameViewModel.getById(id).observeAsState("")
+    //TOdo need to add an obversvable here
+// var name =""
+//    Text(
+//        text = name,
+//        modifier = Modifier.padding(bottom = 16.dp),
+//        // You can style this however you want:
+//        // fontSize = MaterialTheme.typography.headlineMedium.fontSize,
+//        // fontWeight = FontWeight.Bold
+//    )
+
+    //TODO might want to add a go back button and could reuse the code below
+    //TODO need to add a way to  query the list name  and display it on the top
+
+
 
 //    Box(
 //       modifier = Modifier.fillMaxSize(),
@@ -65,11 +90,23 @@ fun DetailScreen(navController: NavHostController, taskViewModel: TaskViewModel)
 //    }
     //this is where the boiler code stops
 
+    val context = LocalContext.current
+    LaunchedEffect(Unit) {
+        Toast.makeText(context, "ID passed: $id", Toast.LENGTH_SHORT).show()
+    }
+
+
+
+
+
 
     Greeting(
         name = "Android",
         modifier = Modifier.padding(15.dp),
-        taskViewModel)
+        taskViewModel,
+        listNameViewModel,
+        id
+    )
 
 
 
@@ -88,11 +125,17 @@ fun DetailScreen(navController: NavHostController, taskViewModel: TaskViewModel)
 
 
 @Composable
-fun Greeting(name: String, modifier: Modifier = Modifier,taskViewModel: TaskViewModel) {
+fun Greeting(name: String, modifier: Modifier = Modifier,taskViewModel: TaskViewModel,listNameViewModel:ListNameViewModel,id: Int) {
     val context = LocalContext.current
 
+
     // Observe the LiveData
-    val taskList  by taskViewModel.allTasks.observeAsState(initial = emptyList())
+    //val listNames  by taskViewModel.listgetAllListName.observeAsState()
+    //val listName by listNameViewModel.allListNames.observeAsState(emptyList()).toString()
+    // Observe the LiveData correctly
+    val listName by listNameViewModel.getById(id).observeAsState("Loading...")
+
+    val taskList by taskViewModel.allTasks.observeAsState(emptyList())
 
     var counter = remember { mutableIntStateOf(0) }
     var text = remember { mutableStateOf("") }
@@ -119,6 +162,10 @@ fun Greeting(name: String, modifier: Modifier = Modifier,taskViewModel: TaskView
         Spacer(modifier = Modifier.height(30.dp))
 
 
+
+        Text(listName, fontSize = 30.sp)
+// Replace "Loading name..." with an appropriate placeholder or handle the null case
+
         Row(){
             OutlinedTextField(
                 value = text.value,
@@ -141,17 +188,12 @@ fun Greeting(name: String, modifier: Modifier = Modifier,taskViewModel: TaskView
 
                 //when; it is not empty then add it to the list
 
-                if(text.value.isNotBlank()){
-                    val taskTest = Task(
-                        //will let room auto generate the id
-                        title = "Todo 1",
-                        description = text.value,
-                        isCompleted = false)
-                    taskViewModel.insert(taskTest)
-                }else {
-                    Toast.makeText(context, "Task Cannot be Empty", Toast.LENGTH_SHORT).show()
-                }
-
+//                if(text.value.isNotBlank()){
+//                    taskViewModel.insert(taskTest)
+//                }else {
+//                    Toast.makeText(context, "Task Cannot be Empty", Toast.LENGTH_SHORT).show()
+//                }
+//
 
 
                 //TODO There somekind of error where if there is a
@@ -167,37 +209,43 @@ fun Greeting(name: String, modifier: Modifier = Modifier,taskViewModel: TaskView
                 Text("Add")
             }
 
+
+
         }
+
+
+
+        //this is where once things have been inputed on the input field then it will reiterate though them and list them
 
         Log.d("Testing", "starting loop")
 
-        LazyColumn {
-            items(taskList){ item -> TaskCard(item,
-                onCheckedChange = {
-
-                    //will update task here to show that the
-                    //task was completed or not
-                    //this is working and will update the database
-                    //however it will not update on the screen itself
-                    //lets see if we can fix that
-                    //I need to modify the tasklist
-
-                    //item.isCompleted = !item.isCompleted
-                    var checkedOrNot = !item.isCompleted
-                    var t1 = Task(
-                        //will let room auto generate the id or not
-                        id = item.id,
-                        title = "Todo 1",
-                        description = item.description,
-                        isCompleted = checkedOrNot)
-                    taskViewModel.update(t1)
-                },
-                onThrashCancle = {
-                    taskList.minus(item)
-                    //will delete from the databse itself
-                    taskViewModel.delete(item)
-                }) }
-        }
+//        LazyColumn {
+//            items(taskList){ item -> TaskCard(item,
+//                onCheckedChange = {
+//
+//                    //will update task here to show that the
+//                    //task was completed or not
+//                    //this is working and will update the database
+//                    //however it will not update on the screen itself
+//                    //lets see if we can fix that
+//                    //I need to modify the tasklist
+//
+//                    //item.isCompleted = !item.isCompleted
+//                    var checkedOrNot = !item.isCompleted
+//                    var t1 = Task(
+//                        //will let room auto generate the id or not
+//                        id = item.id,
+//                        title = "Todo 1",
+//                        //description = item.description,
+//                        isCompleted = checkedOrNot)
+//                    taskViewModel.update(t1)
+//                },
+//                onThrashCancle = {
+//                    taskList.minus(item)
+//                    //will delete from the databse itself
+//                    taskViewModel.delete(item)
+//                }) }
+//        }
 
 
     }
@@ -210,7 +258,7 @@ fun Greeting(name: String, modifier: Modifier = Modifier,taskViewModel: TaskView
 }
 
 @Composable
-fun TaskCard(task: Task,onCheckedChange: (Boolean) -> Unit = {},onThrashCancle: () -> Unit = {}) {
+fun TaskCard(task: Task, onCheckedChange: (Boolean) -> Unit = {}, onThrashCancle: () -> Unit = {}) {
 
     //TODO add a box outline for every row
 
@@ -223,10 +271,10 @@ fun TaskCard(task: Task,onCheckedChange: (Boolean) -> Unit = {},onThrashCancle: 
     Spacer(modifier = Modifier.height(10.dp))
 
 
-
-    var isToggled by rememberSaveable {
-        mutableStateOf(task.isCompleted)
-    }
+//
+//    var isToggled by rememberSaveable {
+//        mutableStateOf(task.isCompleted)
+//    }
 
     Row(modifier = Modifier,
         verticalAlignment = Alignment.CenterVertically
@@ -245,22 +293,22 @@ fun TaskCard(task: Task,onCheckedChange: (Boolean) -> Unit = {},onThrashCancle: 
 
             onClick = {
 
-                isToggled = !isToggled
-                onCheckedChange(isToggled)
+//                isToggled = !isToggled
+//                onCheckedChange(isToggled)
             }
         ) {
-            Icon(
-                modifier = Modifier.fillMaxWidth(.5f),
-                painter = if (
-                    isToggled
-                ) painterResource(id = R.drawable.baseline_check_box_24) else painterResource(id = R.drawable.baseline_check_box_outline_blank_24),
-                contentDescription = null // decorative element,
-
-            )
+//            Icon(
+//                modifier = Modifier.fillMaxWidth(.5f),
+//                painter = if (
+//                    isToggled
+//                ) painterResource(id = R.drawable.baseline_check_box_24) else painterResource(id = R.drawable.baseline_check_box_outline_blank_24),
+//                contentDescription = null // decorative element,
+//
+//            )
         }
 
         //text with task title
-        Text(  modifier = Modifier.fillMaxWidth(.891f),text = task.description)
+       // Text(  modifier = Modifier.fillMaxWidth(.891f),text = task.description)
 
 
 
@@ -269,10 +317,10 @@ fun TaskCard(task: Task,onCheckedChange: (Boolean) -> Unit = {},onThrashCancle: 
             onClick = { onThrashCancle()
             }
         ) {
-            Icon(
-                painter = painterResource(id = R.drawable.baseline_cancel_24),
-                contentDescription = null // decorative element
-            )
+//            Icon(
+//                painter = painterResource(id = R.drawable.baseline_cancel_24),
+//                contentDescription = null // decorative element
+//            )
         }
 
         //ad some space in the rows
