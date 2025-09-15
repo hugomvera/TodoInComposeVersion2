@@ -49,21 +49,21 @@ import com.blacksnowymanx.todoincomposeversion2.roomListNames.ListNameViewModel
 
 @Composable
 fun HomeScreen(navController: NavHostController, listNameViewModel: ListNameViewModel) {
-    Box(
-        modifier = Modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center
-    ) {
-        // This is a clickable text for navigation, currently navigating to a placeholder detail screen
-        Text(
-            modifier = Modifier.clickable {
-                navController.navigate(Screen.Detail.passId(5))
-            },
-            text = "Home",
-            color = MaterialTheme.colorScheme.primary,
-            fontSize = MaterialTheme.typography.headlineLarge.fontSize,
-            fontWeight = FontWeight.Bold
-        )
-    }
+//    Box(
+//        modifier = Modifier.fillMaxSize(),
+//        contentAlignment = Alignment.Center
+//    ) {
+//        // This is a clickable text for navigation, currently navigating to a placeholder detail screen
+//        Text(
+//            modifier = Modifier.clickable {
+//                navController.navigate(Screen.Detail.passId(5))
+//            },
+//            text = "Home",
+//            color = MaterialTheme.colorScheme.primary,
+//            fontSize = MaterialTheme.typography.headlineLarge.fontSize,
+//            fontWeight = FontWeight.Bold
+//        )
+//    }
 
     // Main content of the Home screen
     HomeComp(navController,listNameViewModel)
@@ -107,7 +107,7 @@ fun HomeComp(navController: NavHostController,listNameViewModel: ListNameViewMod
             Button(
                 onClick = {
                     if (listNameText.isNotBlank()) {
-                        val listNameIn = ListName(name = listNameText, description = "some description")
+                        val listNameIn = ListName(name = listNameText, description = "")
                         listNameViewModel.insert(listNameIn)
                         listNameText = "" // Clear the text field after adding
                     } else {
@@ -172,11 +172,11 @@ fun ListNameCard(listNameViewModel: ListNameViewModel,navController: NavHostCont
                     style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold)
                 )
                 Spacer(modifier = Modifier.height(4.dp))
-                Text(
-                    text = listName.description,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = Color.DarkGray
-                )
+//                Text(
+//                    text = listName.description,
+//                    style = MaterialTheme.typography.bodyMedium,
+//                    color = Color.DarkGray
+//                )
             }
 
             IconButton(onClick = onTrashClick) {

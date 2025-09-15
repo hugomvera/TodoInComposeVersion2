@@ -5,7 +5,7 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 import com.blacksnowymanx.todoincomposeversion2.roomListNames.ListName
 import com.blacksnowymanx.todoincomposeversion2.roomListNames.ListNameDao
-@Database(entities = [Task::class, ListName::class], version = 2, exportSchema = false)
+@Database(entities = [Task::class, ListName::class], version = 3, exportSchema = false)
 abstract class TaskDatabase : RoomDatabase() {
     abstract fun taskDao(): TaskDao
     abstract fun listNameDao(): ListNameDao

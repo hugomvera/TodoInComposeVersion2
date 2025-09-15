@@ -1,48 +1,25 @@
 package com.blacksnowymanx.Navigation
 
 import androidx.compose.runtime.livedata.observeAsState
-import android.util.Log
 import android.widget.Toast
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.asPaddingValues
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.systemBars
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.Button
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
-import com.blacksnowymanx.todoincomposeversion2.roomListNames.ListName
-import com.blacksnowymanx.todoincomposeversion2.roomListNames.ListNameViewModel
-import com.blacksnowymanx.todoincomposeversion2.viewmodel.TaskViewModel
-import androidx.compose.runtime.livedata.observeAsState
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.res.painterResource
+import com.blacksnowymanx.todoincomposeversion2.R
 import com.blacksnowymanx.todoincomposeversion2.room.Task
+import com.blacksnowymanx.todoincomposeversion2.roomListNames.ListNameViewModel
+import com.blacksnowymanx.todoincomposeversion2.viewmodel.TaskViewModel
 
-import kotlin.toString
-
-//TODO need to comment
 @Composable
 fun DetailScreen(
     navController: NavHostController,
@@ -50,108 +27,34 @@ fun DetailScreen(
     listNameViewModel: ListNameViewModel,
     id: Int
 ){
-
-    //val name by listNameViewModel.getById(id).observeAsState("")
-    //TOdo need to add an obversvable here
-// var name =""
-//    Text(
-//        text = name,
-//        modifier = Modifier.padding(bottom = 16.dp),
-//        // You can style this however you want:
-//        // fontSize = MaterialTheme.typography.headlineMedium.fontSize,
-//        // fontWeight = FontWeight.Bold
-//    )
-
-    //TODO might want to add a go back button and could reuse the code below
-    //TODO need to add a way to  query the list name  and display it on the top
-
-
-
-//    Box(
-//       modifier = Modifier.fillMaxSize(),
-//        contentAlignment = Alignment.Center
-//    ){
-//        Text(
-//
-//            modifier = Modifier.clickable {
-//                navController.navigate(Screen.Home.route)
-//                {popUpTo(Screen.Home.route)
-//                {
-//                    inclusive = true
-//                } }
-//                //navController.popBackStack()
-//            },
-//            text = "Deetail",
-//            color = Color.Red,
-//            //fontSize = MaterialTheme.typography.h3.fontSize,
-//            fontSize = MaterialTheme.typography.headlineLarge.fontSize,
-//            fontWeight = FontWeight.Bold
-//        )
-//    }
-    //this is where the boiler code stops
-
     val context = LocalContext.current
     LaunchedEffect(Unit) {
         Toast.makeText(context, "ID passed: $id", Toast.LENGTH_SHORT).show()
     }
 
-
-
-
-
-
     Greeting(
         name = "Android",
         modifier = Modifier.padding(15.dp),
-        taskViewModel,
-        listNameViewModel,
-        id
+        taskViewModel = taskViewModel,
+        listNameViewModel = listNameViewModel,
+        id = id
     )
-
-
-
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
 @Composable
-fun Greeting(name: String, modifier: Modifier = Modifier,taskViewModel: TaskViewModel,listNameViewModel:ListNameViewModel,id: Int) {
+fun Greeting(
+    name: String,
+    modifier: Modifier = Modifier,
+    taskViewModel: TaskViewModel,
+    listNameViewModel: ListNameViewModel,
+    id: Int
+) {
     val context = LocalContext.current
-
-
-    // Observe the LiveData
-    //val listNames  by taskViewModel.listgetAllListName.observeAsState()
-    //val listName by listNameViewModel.allListNames.observeAsState(emptyList()).toString()
-    // Observe the LiveData correctly
     val listName by listNameViewModel.getById(id).observeAsState("Loading...")
-
     val taskList by taskViewModel.allTasks.observeAsState(emptyList())
 
-    var counter = remember { mutableIntStateOf(0) }
     var text = remember { mutableStateOf("") }
 
-
-
-    //let us do an observer here
-
-
-
-    //this alone will cause an error
-    // i cannot just print all of the thi ngs in the tasklist
-    //Log.d("TaskApp", taskViewModel.allTasks.toString())
-
-
-    val padding = 25.dp
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -160,190 +63,138 @@ fun Greeting(name: String, modifier: Modifier = Modifier,taskViewModel: TaskView
     ) {
 
         Spacer(modifier = Modifier.height(30.dp))
-
-
-
         Text(listName, fontSize = 30.sp)
-// Replace "Loading name..." with an appropriate placeholder or handle the null case
 
-        Row(){
+        Row {
             OutlinedTextField(
                 value = text.value,
                 onValueChange = { text.value = it },
                 label = { Text("Enter your Task") },
                 placeholder = { Text("Task ...") },
                 singleLine = true,
-                modifier = Modifier
-                    .weight(1f)
-
+                modifier = Modifier.weight(1f)
             )
-
-
 
             Spacer(modifier = Modifier.width(20.dp))
             Button(onClick = {
-
-
-
-
-                //when; it is not empty then add it to the list
-
-//                if(text.value.isNotBlank()){
-//                    taskViewModel.insert(taskTest)
-//                }else {
-//                    Toast.makeText(context, "Task Cannot be Empty", Toast.LENGTH_SHORT).show()
-//                }
-//
-
-
-                //TODO There somekind of error where if there is a
-                //Todo Add change to diffierent langauages i guyess
-                //Todo the input line width
-                //TODo ADD navigation
-
-
-
-
-
+                if (text.value.isNotBlank()) {
+                    taskViewModel.insert(Task(title = text.value, listName = listName, isCompleted = false))
+                    text.value = "" // clear input after adding
+                } else {
+                    Toast.makeText(context, "Task Cannot be Empty", Toast.LENGTH_SHORT).show()
+                }
             }) {
                 Text("Add")
             }
-
-
-
         }
 
+        Spacer(modifier = Modifier.height(20.dp))
 
-
-        //this is where once things have been inputed on the input field then it will reiterate though them and list them
-
-        Log.d("Testing", "starting loop")
-
-//        LazyColumn {
-//            items(taskList){ item -> TaskCard(item,
-//                onCheckedChange = {
-//
-//                    //will update task here to show that the
-//                    //task was completed or not
-//                    //this is working and will update the database
-//                    //however it will not update on the screen itself
-//                    //lets see if we can fix that
-//                    //I need to modify the tasklist
-//
-//                    //item.isCompleted = !item.isCompleted
-//                    var checkedOrNot = !item.isCompleted
-//                    var t1 = Task(
-//                        //will let room auto generate the id or not
-//                        id = item.id,
-//                        title = "Todo 1",
-//                        //description = item.description,
-//                        isCompleted = checkedOrNot)
-//                    taskViewModel.update(t1)
-//                },
-//                onThrashCancle = {
-//                    taskList.minus(item)
-//                    //will delete from the databse itself
-//                    taskViewModel.delete(item)
-//                }) }
-//        }
-
-
+        LazyColumn {
+            items(taskList) { item ->
+                TaskCard(
+                    task = item,
+                    onCheckedChange = { checked ->
+                        // Toggle completion
+                        taskViewModel.update(item.copy(isCompleted = checked))
+                    },
+                    onUpdate = { newText ->
+                        // Update task title
+                        if (newText.isNotBlank()) {
+                            taskViewModel.update(item.copy(title = newText))
+                        }
+                    },
+                    onDelete = {
+                        // Delete task
+                        taskViewModel.delete(item)
+                    }
+                )
+            }
+        }
     }
-
-
-
-
-
-
 }
 
 @Composable
-fun TaskCard(task: Task, onCheckedChange: (Boolean) -> Unit = {}, onThrashCancle: () -> Unit = {}) {
+fun TaskCard(
+    task: Task,
+    onCheckedChange: (Boolean) -> Unit = {},
+    onUpdate: (String) -> Unit = {},
+    onDelete: () -> Unit = {}
+) {
+    var isToggled by rememberSaveable { mutableStateOf(task.isCompleted) } // checkbox state
+    var isEditing by rememberSaveable { mutableStateOf(false) }            // edit mode
+    var editedText by rememberSaveable { mutableStateOf(task.title) }      // editable text
 
-    //TODO add a box outline for every row
-
-
-
-    //TODO if it is checked then strike thorugh the text
-
-    //TODO maybe look at other apps for styling
-    //add space between the rows
     Spacer(modifier = Modifier.height(10.dp))
 
-
-//
-//    var isToggled by rememberSaveable {
-//        mutableStateOf(task.isCompleted)
-//    }
-
-    Row(modifier = Modifier,
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(8.dp),
         verticalAlignment = Alignment.CenterVertically
-
     ) {
-        //checkcbox or box depedning if is is checked or not
-
-
-        //this icon is the checkbox
-        //so if we click it then we will change the value of ischecked
-
-        //TODO restrict the lenght of a todo itiem
-        //TODO restrict length of input
+        // Checkbox
         IconButton(
-            modifier = Modifier.fillMaxWidth(.1f),
-
+            modifier = Modifier.width(40.dp),
             onClick = {
-
-//                isToggled = !isToggled
-//                onCheckedChange(isToggled)
+                isToggled = !isToggled
+                onCheckedChange(isToggled)
             }
         ) {
-//            Icon(
-//                modifier = Modifier.fillMaxWidth(.5f),
-//                painter = if (
-//                    isToggled
-//                ) painterResource(id = R.drawable.baseline_check_box_24) else painterResource(id = R.drawable.baseline_check_box_outline_blank_24),
-//                contentDescription = null // decorative element,
-//
-//            )
+            Icon(
+                painter = if (isToggled)
+                    painterResource(id = R.drawable.baseline_check_box_24)
+                else
+                    painterResource(id = R.drawable.baseline_check_box_outline_blank_24),
+                contentDescription = "Toggle Task"
+            )
         }
 
-        //text with task title
-       // Text(  modifier = Modifier.fillMaxWidth(.891f),text = task.description)
+        // Text or Editable Field
+        if (isEditing) {
+            // ---- EDIT MODE ----
+            OutlinedTextField(
+                value = editedText,
+                onValueChange = { editedText = it },
+                singleLine = true,
+                modifier = Modifier.weight(1f),
+                placeholder = { Text("Edit task") }
+            )
+        } else {
+            // ---- DISPLAY MODE ----
+            Text(
+                text = task.title,
+                modifier = Modifier.weight(1f),
+                fontSize = 18.sp,
+                style = if (isToggled) androidx.compose.ui.text.TextStyle(
+                    textDecoration = androidx.compose.ui.text.style.TextDecoration.LineThrough
+                ) else androidx.compose.ui.text.TextStyle.Default
+            )
+        }
 
-
-
-        IconButton(
-            modifier = Modifier.fillMaxWidth(.5f),
-            onClick = { onThrashCancle()
+        // Edit / Save button
+        IconButton(onClick = {
+            if (isEditing) {
+                // ---- SAVE ACTION ----
+                onUpdate(editedText)
             }
-        ) {
-//            Icon(
-//                painter = painterResource(id = R.drawable.baseline_cancel_24),
-//                contentDescription = null // decorative element
-//            )
+            isEditing = !isEditing
+        }) {
+            Icon(
+                painter = if (isEditing)
+                    painterResource(id = R.drawable.outline_edit_24)
+                else
+                    painterResource(id = R.drawable.outline_edit_24),
+                contentDescription = if (isEditing) "Save" else "Edit Task"
+            )
         }
 
-        //ad some space in the rows
-        //center the text
-        //delete button should be all the way to the righth
-        //Maybe make the text bigger once seen in a real device
-
-        //delete icon or button
-
-        //TODO rename application
-        //TODO make a better name for the app
-        //TODO navigation
-
-
+        // Delete button
+        IconButton(onClick = onDelete) {
+            Icon(
+                painter = painterResource(id = R.drawable.baseline_cancel_24),
+                contentDescription = "Delete Task"
+            )
+        }
     }
-
 }
-
-//Todo some hoisting to change the task
-//level 10
-//Todo Fix the button so it is not to big vertical whise
-
-//TODO I want to be able when the device is fliped on itside then the input will take the whole
-
-
-
