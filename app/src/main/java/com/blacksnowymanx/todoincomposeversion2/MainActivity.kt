@@ -40,7 +40,7 @@ import com.blacksnowymanx.todoincomposeversion2.room.Task
 import com.blacksnowymanx.todoincomposeversion2.room.TaskDatabase
 import com.blacksnowymanx.todoincomposeversion2.room.TaskViewModelFactory
 import com.blacksnowymanx.todoincomposeversion2.ui.theme.TodoInComposeVersion2Theme
-import com.blacksnowymanx.todoincomposeversion2.viewmodel.TaskViewModel
+import com.blacksnowymanx.todoincomposeversion2.room.TaskViewModel
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.ui.Alignment

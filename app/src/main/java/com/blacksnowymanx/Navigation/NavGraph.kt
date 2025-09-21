@@ -8,7 +8,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.blacksnowymanx.todoincomposeversion2.roomListNames.ListNameViewModel
-import com.blacksnowymanx.todoincomposeversion2.viewmodel.TaskViewModel
+import com.blacksnowymanx.todoincomposeversion2.room.TaskViewModel
 
 
 @Composable

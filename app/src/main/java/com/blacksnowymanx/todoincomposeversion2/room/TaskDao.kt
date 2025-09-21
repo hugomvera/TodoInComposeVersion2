@@ -14,6 +14,10 @@ interface TaskDao {
     @Query("SELECT * FROM tasks ORDER BY id DESC")
     fun getAllTasks(): LiveData<List<Task>> // Fetch all tasks.
 
+    //this will get all the tasks for a specific list
+    @Query("SELECT * FROM tasks WHERE listName = :listName")
+    fun getTasksByListName(listName: String): LiveData<List<Task>>
+
     //this will list the names of the lists and remove duplicates
 
 }
