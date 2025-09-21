@@ -18,8 +18,9 @@ import androidx.compose.ui.res.painterResource
 import com.blacksnowymanx.todoincomposeversion2.R
 import com.blacksnowymanx.todoincomposeversion2.room.Task
 import com.blacksnowymanx.todoincomposeversion2.roomListNames.ListNameViewModel
-import com.blacksnowymanx.todoincomposeversion2.viewmodel.TaskViewModel
+import com.blacksnowymanx.todoincomposeversion2.room.TaskViewModel
 
+//Todo maybe change the name
 @Composable
 fun DetailScreen(
     navController: NavHostController,
@@ -49,9 +50,18 @@ fun Greeting(
     listNameViewModel: ListNameViewModel,
     id: Int
 ) {
+    //this is for the context not sure
     val context = LocalContext.current
+
+    //this is gets all the listNames might not needed here
     val listName by listNameViewModel.getById(id).observeAsState("Loading...")
-    val taskList by taskViewModel.allTasks.observeAsState(emptyList())
+
+    //this gets the list of tasks for all
+    //TODO might want to only load the ones that are for the listname passed in
+    //URGENT to get this right
+   // val taskList by taskViewModel.allTasks.observeAsState(emptyList())
+    val taskList by taskViewModel.getTasksByListName(listName).observeAsState(emptyList())
+
 
     var text = remember { mutableStateOf("") }
 
@@ -90,6 +100,8 @@ fun Greeting(
 
         Spacer(modifier = Modifier.height(20.dp))
 
+        //here is where the list of tasks goes and every element is passed
+        //could maybe filter it here
         LazyColumn {
             items(taskList) { item ->
                 TaskCard(

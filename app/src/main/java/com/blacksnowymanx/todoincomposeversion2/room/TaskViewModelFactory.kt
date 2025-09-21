@@ -2,7 +2,7 @@ package com.blacksnowymanx.todoincomposeversion2.room
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import com.blacksnowymanx.todoincomposeversion2.viewmodel.TaskViewModel
+import com.blacksnowymanx.todoincomposeversion2.room.TaskViewModel
 
 class TaskViewModelFactory(private val taskDao: TaskDao) : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {

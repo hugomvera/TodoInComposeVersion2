@@ -1,10 +1,8 @@
-package com.blacksnowymanx.todoincomposeversion2.viewmodel
+package com.blacksnowymanx.todoincomposeversion2.room
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.blacksnowymanx.todoincomposeversion2.room.Task
-import com.blacksnowymanx.todoincomposeversion2.room.TaskDao
 import kotlinx.coroutines.launch
 
 class TaskViewModel(private val taskDao: TaskDao) : ViewModel() {
@@ -31,6 +29,10 @@ class TaskViewModel(private val taskDao: TaskDao) : ViewModel() {
     }
 
 
+    // Make sure this function exists and is spelled correctly
+    fun getTasksByListName(listName: String): LiveData<List<Task>> { // Or Flow<List<Task>>
+        return taskDao.getTasksByListName(listName)
+    }
 
 
 
