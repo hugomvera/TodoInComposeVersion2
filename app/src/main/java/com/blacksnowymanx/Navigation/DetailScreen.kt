@@ -33,6 +33,7 @@ fun DetailScreen(
         Toast.makeText(context, "ID passed: $id", Toast.LENGTH_SHORT).show()
     }
 
+    //TODO : Change the name of this
     Greeting(
         name = "Android",
         modifier = Modifier.padding(15.dp),
@@ -42,6 +43,7 @@ fun DetailScreen(
     )
 }
 
+//TODO CHANget this name to something else
 @Composable
 fun Greeting(
     name: String,
