@@ -1,4 +1,4 @@
-package com.blacksnowymanx.Navigation
+package com.blacksnowymanx.navigation
 
 import androidx.compose.runtime.livedata.observeAsState
 import android.widget.Toast

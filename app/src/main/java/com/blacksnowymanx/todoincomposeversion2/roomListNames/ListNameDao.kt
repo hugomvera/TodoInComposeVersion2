@@ -15,6 +15,9 @@ interface ListNameDao {
     @Delete
     suspend fun delete(listName: ListName)
 
+    @Update
+    suspend fun update(listName: ListName)
+
 
     @Query("SELECT name FROM list_names ORDER BY id ASC")
     fun getAllListNames(): LiveData<List<String>>

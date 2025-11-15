@@ -18,6 +18,13 @@ class ListNameViewModel(private val listNameDao: ListNameDao) : ViewModel() {
         }
     }
 
+    // Function to update a list name
+    fun update(listName: ListName) {
+        viewModelScope.launch {
+            listNameDao.update(listName)
+        }
+    }
+
     fun getById(id: Int): LiveData<String> {
         return  listNameDao.getListNameById(id)
     }

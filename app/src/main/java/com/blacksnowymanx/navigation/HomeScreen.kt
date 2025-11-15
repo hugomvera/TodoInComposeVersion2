@@ -1,9 +1,7 @@
-package com.blacksnowymanx.Navigation
+package com.blacksnowymanx.navigation
 
-import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -40,7 +38,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.blacksnowymanx.todoincomposeversion2.R
@@ -49,33 +46,12 @@ import com.blacksnowymanx.todoincomposeversion2.roomListNames.ListNameViewModel
 
 @Composable
 fun HomeScreen(navController: NavHostController, listNameViewModel: ListNameViewModel) {
-//    Box(
-//        modifier = Modifier.fillMaxSize(),
-//        contentAlignment = Alignment.Center
-//    ) {
-//        // This is a clickable text for navigation, currently navigating to a placeholder detail screen
-//        Text(
-//            modifier = Modifier.clickable {
-//                navController.navigate(Screen.Detail.passId(5))
-//            },
-//            text = "Home",
-//            color = MaterialTheme.colorScheme.primary,
-//            fontSize = MaterialTheme.typography.headlineLarge.fontSize,
-//            fontWeight = FontWeight.Bold
-//        )
-//    }
-
-    // Main content of the Home screen
-    HomeComp(navController,listNameViewModel)
+    HomeComp(navController, listNameViewModel)
 }
 
 @Composable
-fun HomeComp(navController: NavHostController,listNameViewModel: ListNameViewModel) {
-    //this is to get the listname
+fun HomeComp(navController: NavHostController, listNameViewModel: ListNameViewModel) {
     val listNameList by listNameViewModel.allListNames.observeAsState(emptyList())
-
-
-
 
     val context = LocalContext.current
     var listNameText by remember { mutableStateOf("") }
@@ -84,7 +60,7 @@ fun HomeComp(navController: NavHostController,listNameViewModel: ListNameViewMod
         modifier = Modifier
             .fillMaxSize()
             .padding(WindowInsets.systemBars.asPaddingValues())
-            .padding(16.dp)
+            .padding(horizontal = 16.dp)
     ) {
         Spacer(modifier = Modifier.height(30.dp))
 
@@ -107,7 +83,7 @@ fun HomeComp(navController: NavHostController,listNameViewModel: ListNameViewMod
             Button(
                 onClick = {
                     if (listNameText.isNotBlank()) {
-                        val listNameIn = ListName(name = listNameText, description = "")
+                        val listNameIn = ListName(name = listNameText.trim(), description = "")
                         listNameViewModel.insert(listNameIn)
                         listNameText = "" // Clear the text field after adding
                     } else {
@@ -126,7 +102,9 @@ fun HomeComp(navController: NavHostController,listNameViewModel: ListNameViewMod
             modifier = Modifier.fillMaxSize()
         ) {
             items(listNameList) { item ->
-                ListNameCard(listNameViewModel,navController,
+                ListNameCard(
+                    listNameViewModel,
+                    navController,
                     listName = item,
                     onTrashClick = {
                         listNameViewModel.delete(item)
@@ -136,27 +114,30 @@ fun HomeComp(navController: NavHostController,listNameViewModel: ListNameViewMod
         }
     }
 }
+
 @Composable
-fun ListNameCard(listNameViewModel: ListNameViewModel,navController: NavHostController,
+fun ListNameCard(
+    listNameViewModel: ListNameViewModel,
+    navController: NavHostController,
     listName: ListName,
     onTrashClick: () -> Unit
 ) {
     val context = LocalContext.current
+
+    var isEditing by remember { mutableStateOf(false) }
+    // Initialize editedText with the current listName.name.
+    // This is important so the TextField has the correct value when edit mode starts.
+    var editedText by remember(listName.name) { mutableStateOf(listName.name) }
 
     Card(
         shape = RoundedCornerShape(20.dp),
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 8.dp)
-            .clickable {
-                Toast
-                    .makeText(context, "Clicked: ${listName.name}", Toast.LENGTH_SHORT)
-                    .show()
+            .clickable(enabled = !isEditing) {
                 navController.navigate(Screen.Detail.passId(listName.id))
-
             },
         elevation = CardDefaults.cardElevation(6.dp),
-        colors = CardDefaults.cardColors(containerColor = Color(0xFFE3F2FD))
     ) {
         Row(
             modifier = Modifier
@@ -164,21 +145,70 @@ fun ListNameCard(listNameViewModel: ListNameViewModel,navController: NavHostCont
                 .fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
         ) {
+            // This Column takes up the remaining space
             Column(
                 modifier = Modifier.weight(1f)
             ) {
-                Text(
-                    text = listName.name,
-                    style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold)
-                )
+                if (isEditing) {
+                    OutlinedTextField(
+                        value = editedText,
+                        onValueChange = { editedText = it },
+                        singleLine = true,
+                        // Use fillMaxWidth() to properly occupy the weighted space.
+                        // Removed the redundant .weight(1f) and padding is handled by the parent row's padding.
+                        modifier = Modifier.fillMaxWidth(),
+                        placeholder = { Text("Enter new list name") }
+                    )
+                } else {
+                    // Removed the redundant inner Column(modifier = Modifier.weight(1f))
+                    Text(
+                        text = listName.name,
+                        style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold)
+                    )
+                }
+
                 Spacer(modifier = Modifier.height(4.dp))
-//                Text(
-//                    text = listName.description,
-//                    style = MaterialTheme.typography.bodyMedium,
-//                    color = Color.DarkGray
-//                )
+                // You can uncomment the description text here if you want to show it:
+                /*
+                Text(
+                    text = listName.description,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = Color.DarkGray
+                )
+                */
             }
 
+
+            // ---- EDIT / SAVE BUTTON ----
+            IconButton(onClick = {
+                if (isEditing) {
+                    // ---- SAVE ACTION ----
+                    if (editedText.isNotBlank()) {
+                        // Trim the edited text to remove leading/trailing spaces
+                        val updatedList = listName.copy(name = editedText.trim())
+                        listNameViewModel.update(updatedList)
+
+                        isEditing = false
+                    } else {
+                        Toast.makeText(context, "List Name Cannot be Empty", Toast.LENGTH_SHORT).show()
+                    }
+                } else {
+                    // ---- ENTER EDIT MODE ----
+                    // When entering edit mode, ensure editedText is set to the current list name
+                    editedText = listName.name
+                    isEditing = true
+                }
+            }) {
+                // Change icon depending on whether editing or saving
+                Icon(
+                    // You might want to use a 'save' icon instead of 'edit_off' for better clarity
+                    painter = painterResource(id = if (isEditing) R.drawable.outline_edit_off  else R.drawable.outline_edit_24),
+                    contentDescription = if (isEditing) "Save changes" else "Edit list name"
+                )
+            }
+
+
+            // ---- DELETE BUTTON ----
             IconButton(onClick = onTrashClick) {
                 Icon(
                     imageVector = Icons.Default.Delete,
@@ -189,8 +219,3 @@ fun ListNameCard(listNameViewModel: ListNameViewModel,navController: NavHostCont
         }
     }
 }
-
-
-
-// The TaskCard and the second ListNameCard function were either incomplete or duplicates.
-// I've removed them to fix the compilation errors.

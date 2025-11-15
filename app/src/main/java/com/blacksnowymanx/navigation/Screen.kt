@@ -1,4 +1,4 @@
-package com.blacksnowymanx.Navigation
+package com.blacksnowymanx.navigation
 
 
 const val Detail_ARGUMENT_KEY = "id"
