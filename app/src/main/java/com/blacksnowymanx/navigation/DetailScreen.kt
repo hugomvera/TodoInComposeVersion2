@@ -1,71 +1,75 @@
 package com.blacksnowymanx.navigation
 
-import androidx.compose.runtime.livedata.observeAsState
 import android.widget.Toast
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.foundation.gestures.draggable
+import androidx.compose.foundation.gestures.rememberDraggableState
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.res.painterResource
 import com.blacksnowymanx.todoincomposeversion2.R
 import com.blacksnowymanx.todoincomposeversion2.room.Task
-import com.blacksnowymanx.todoincomposeversion2.roomListNames.ListNameViewModel
 import com.blacksnowymanx.todoincomposeversion2.room.TaskViewModel
+import com.blacksnowymanx.todoincomposeversion2.roomListNames.ListNameViewModel
+import kotlin.math.roundToInt
 
-//Todo maybe change the name
 @Composable
 fun DetailScreen(
     navController: NavHostController,
     taskViewModel: TaskViewModel,
     listNameViewModel: ListNameViewModel,
     id: Int
-){
+) {
     val context = LocalContext.current
-    LaunchedEffect(Unit) {
-        Toast.makeText(context, "ID passed: $id", Toast.LENGTH_SHORT).show()
-    }
 
-    //TODO : Change the name of this
-    Greeting(
-        name = "Android",
-        modifier = Modifier.padding(15.dp),
+//    LaunchedEffect(Unit) {
+//        Toast.makeText(context, "ID passed: $id", Toast.LENGTH_SHORT).show()
+//    }
+
+    TaskListScreen(
         taskViewModel = taskViewModel,
         listNameViewModel = listNameViewModel,
         id = id
     )
 }
 
-//TODO CHANget this name to something else
 @Composable
-fun Greeting(
-    name: String,
-    modifier: Modifier = Modifier,
+fun TaskListScreen(
     taskViewModel: TaskViewModel,
     listNameViewModel: ListNameViewModel,
     id: Int
 ) {
-    //this is for the context not sure
     val context = LocalContext.current
 
-    //this is gets all the listNames might not needed here
     val listName by listNameViewModel.getById(id).observeAsState("Loading...")
+    val dbTasks by taskViewModel.getTasksByListName(listName).observeAsState(emptyList())
 
-    //this gets the list of tasks for all
-    //TODO might want to only load the ones that are for the listname passed in
-    //URGENT to get this right
-   // val taskList by taskViewModel.allTasks.observeAsState(emptyList())
-    val taskList by taskViewModel.getTasksByListName(listName).observeAsState(emptyList())
+    val taskList = remember { mutableStateListOf<Task>() }
 
+    LaunchedEffect(dbTasks) {
+        taskList.clear()
+        taskList.addAll(dbTasks)
+    }
 
-    var text = remember { mutableStateOf("") }
+    var text by remember { mutableStateOf("") }
 
     Column(
         modifier = Modifier
@@ -75,23 +79,31 @@ fun Greeting(
     ) {
 
         Spacer(modifier = Modifier.height(30.dp))
-        Text(listName, fontSize = 30.sp)
+        Text(listName, fontSize = 30.sp, fontWeight = FontWeight.Bold)
 
-        Row {
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Row(verticalAlignment = Alignment.CenterVertically) {
             OutlinedTextField(
-                value = text.value,
-                onValueChange = { text.value = it },
+                value = text,
+                onValueChange = { text = it },
                 label = { Text("Enter your Task") },
-                placeholder = { Text("Task ...") },
                 singleLine = true,
                 modifier = Modifier.weight(1f)
             )
 
             Spacer(modifier = Modifier.width(20.dp))
+
             Button(onClick = {
-                if (text.value.isNotBlank()) {
-                    taskViewModel.insert(Task(title = text.value, listName = listName, isCompleted = false))
-                    text.value = "" // clear input after adding
+                if (text.isNotBlank()) {
+                    taskViewModel.insert(
+                        Task(
+                            title = text.trim(),
+                            listName = listName,
+                            isCompleted = false
+                        )
+                    )
+                    text = ""
                 } else {
                     Toast.makeText(context, "Task Cannot be Empty", Toast.LENGTH_SHORT).show()
                 }
@@ -102,25 +114,25 @@ fun Greeting(
 
         Spacer(modifier = Modifier.height(20.dp))
 
-        //here is where the list of tasks goes and every element is passed
-        //could maybe filter it here
         LazyColumn {
-            items(taskList) { item ->
-                TaskCard(
-                    task = item,
-                    onCheckedChange = { checked ->
-                        // Toggle completion
-                        taskViewModel.update(item.copy(isCompleted = checked))
+            itemsIndexed(
+                items = taskList,
+                key = { _, task -> task.id }
+            ) { index, task ->
+                ReorderableTaskCard(
+                    startIndex = index,
+                    task = task,
+                    taskList = taskList,
+                    onCheckedChange = {
+                        taskViewModel.update(task.copy(isCompleted = it))
                     },
-                    onUpdate = { newText ->
-                        // Update task title
-                        if (newText.isNotBlank()) {
-                            taskViewModel.update(item.copy(title = newText))
+                    onUpdate = {
+                        if (it.isNotBlank()) {
+                            taskViewModel.update(task.copy(title = it))
                         }
                     },
                     onDelete = {
-                        // Delete task
-                        taskViewModel.delete(item)
+                        taskViewModel.delete(task)
                     }
                 )
             }
@@ -129,86 +141,111 @@ fun Greeting(
 }
 
 @Composable
-fun TaskCard(
+fun ReorderableTaskCard(
+    startIndex: Int,
     task: Task,
-    onCheckedChange: (Boolean) -> Unit = {},
-    onUpdate: (String) -> Unit = {},
-    onDelete: () -> Unit = {}
+    taskList: MutableList<Task>,
+    onCheckedChange: (Boolean) -> Unit,
+    onUpdate: (String) -> Unit,
+    onDelete: () -> Unit
 ) {
-    var isToggled by rememberSaveable { mutableStateOf(task.isCompleted) } // checkbox state
-    var isEditing by rememberSaveable { mutableStateOf(false) }            // edit mode
-    var editedText by rememberSaveable { mutableStateOf(task.title) }      // editable text
+    var isCompleted by rememberSaveable { mutableStateOf(task.isCompleted) }
+    var isEditing by rememberSaveable { mutableStateOf(false) }
+    var editedText by rememberSaveable { mutableStateOf(task.title) }
 
-    Spacer(modifier = Modifier.height(10.dp))
+    var dragOffset by remember { mutableFloatStateOf(0f) }
+    var currentIndex by remember { mutableIntStateOf(startIndex) }
 
-    Row(
+    val itemHeightPx = with(LocalDensity.current) { 90.dp.toPx() }
+
+    Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(8.dp),
-        verticalAlignment = Alignment.CenterVertically
+            .offset { IntOffset(0, dragOffset.roundToInt()) }
+            .draggable(
+                orientation = Orientation.Vertical,
+                state = rememberDraggableState { delta ->
+                    dragOffset += delta
+
+                    val movedSlots = (dragOffset / itemHeightPx).toInt()
+                    val targetIndex = (currentIndex + movedSlots)
+                        .coerceIn(0, taskList.lastIndex)
+
+                    if (targetIndex != currentIndex) {
+                        taskList.removeAt(currentIndex)
+                        taskList.add(targetIndex, task)
+                        currentIndex = targetIndex
+                        dragOffset = 0f
+                    }
+                },
+                onDragStopped = { dragOffset = 0f }
+            )
+            .padding(vertical = 8.dp),
+        shape = RoundedCornerShape(20.dp),
+        elevation = CardDefaults.cardElevation(6.dp)
     ) {
-        // Checkbox
-        IconButton(
-            modifier = Modifier.width(40.dp),
-            onClick = {
-                isToggled = !isToggled
-                onCheckedChange(isToggled)
-            }
+        Row(
+            modifier = Modifier
+                .padding(16.dp)
+                .fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Icon(
-                painter = if (isToggled)
-                    painterResource(id = R.drawable.baseline_check_box_24)
-                else
-                    painterResource(id = R.drawable.baseline_check_box_outline_blank_24),
-                contentDescription = "Toggle Task"
-            )
-        }
 
-        // Text or Editable Field
-        if (isEditing) {
-            // ---- EDIT MODE ----
-            OutlinedTextField(
-                value = editedText,
-                onValueChange = { editedText = it },
-                singleLine = true,
-                modifier = Modifier.weight(1f),
-                placeholder = { Text("Edit task") }
-            )
-        } else {
-            // ---- DISPLAY MODE ----
-            Text(
-                text = task.title,
-                modifier = Modifier.weight(1f),
-                fontSize = 18.sp,
-                style = if (isToggled) androidx.compose.ui.text.TextStyle(
-                    textDecoration = androidx.compose.ui.text.style.TextDecoration.LineThrough
-                ) else androidx.compose.ui.text.TextStyle.Default
-            )
-        }
-
-        // Edit / Save button
-        IconButton(onClick = {
-            if (isEditing) {
-                // ---- SAVE ACTION ----
-                onUpdate(editedText)
+            IconButton(onClick = {
+                isCompleted = !isCompleted
+                onCheckedChange(isCompleted)
+            }) {
+                Icon(
+                    painter = painterResource(
+                        if (isCompleted)
+                            R.drawable.baseline_check_box_24
+                        else
+                            R.drawable.baseline_check_box_outline_blank_24
+                    ),
+                    contentDescription = "Toggle Task"
+                )
             }
-            isEditing = !isEditing
-        }) {
-            Icon(
-                painter = if (isEditing)
-                    painterResource(id = R.drawable.outline_edit_24)
-                else
-                    painterResource(id = R.drawable.outline_edit_24),
-                contentDescription = if (isEditing) "Save" else "Edit Task"
-            )
-        }
 
-        // Delete button
-        IconButton(onClick = onDelete) {
-            Icon(
-                painter = painterResource(id = R.drawable.baseline_cancel_24),
-                contentDescription = "Delete Task"
-            )
+            Spacer(modifier = Modifier.width(8.dp))
+
+            if (isEditing) {
+                OutlinedTextField(
+                    value = editedText,
+                    onValueChange = { editedText = it },
+                    singleLine = true,
+                    modifier = Modifier.weight(1f)
+                )
+            } else {
+                Text(
+                    text = task.title,
+                    modifier = Modifier.weight(1f),
+                    fontSize = 18.sp,
+                    textDecoration = if (isCompleted)
+                        TextDecoration.LineThrough
+                    else
+                        TextDecoration.None
+                )
+            }
+
+            IconButton(onClick = {
+                if (isEditing) {
+                    onUpdate(editedText)
+                }
+                isEditing = !isEditing
+            }) {
+                Icon(
+                    painter = painterResource(id = R.drawable.outline_edit_24),
+                    contentDescription = "Edit Task"
+                )
+            }
+
+            IconButton(onClick = onDelete) {
+                Icon(
+                    painter = painterResource(id = R.drawable.baseline_cancel_24),
+                    contentDescription = "Delete Task",
+                    tint = Color.Red
+                )
+            }
         }
     }
 }
