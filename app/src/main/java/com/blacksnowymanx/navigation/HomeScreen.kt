@@ -29,6 +29,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -44,31 +45,60 @@ import com.blacksnowymanx.todoincomposeversion2.R
 import com.blacksnowymanx.todoincomposeversion2.roomListNames.ListName
 import com.blacksnowymanx.todoincomposeversion2.roomListNames.ListNameViewModel
 
+
+//this seems a bit redudent the homescreen is calling the homecomp
+//this is the starting  point from the Main activity
+//homeScreen has 2 parameters NavController and ListnameViewMode
 @Composable
-fun HomeScreen(navController: NavHostController, listNameViewModel: ListNameViewModel) {
+fun HomeScreen(
+    navController: NavHostController,
+    listNameViewModel: ListNameViewModel
+) {
     HomeComp(navController, listNameViewModel)
 }
 
+//this is called from HomeComp
+//passes 2 parameters the  navcontroler and the viewmodel for the list
 @Composable
-fun HomeComp(navController: NavHostController, listNameViewModel: ListNameViewModel) {
+fun HomeComp(
+    navController: NavHostController,
+    listNameViewModel: ListNameViewModel
+) {
+    //This is a the name of the list of the list
+    //so it contains  alist of all the names in the the toodo app list
+    //its a type of list in its datastucture
+    //this val starts out emtpy at firsrt
     val listNameList by listNameViewModel.allListNames.observeAsState(emptyList())
 
+    //self explanatory
     val context = LocalContext.current
+
+    //this it he name of the listName or the text in the row
     var listNameText by remember { mutableStateOf("") }
 
+
+    //this column will have the button on the top where it adds
+    //it will also hav ehte input list
+    //later in the code it will call the lazy list where will make the cards
     Column(
         modifier = Modifier
             .fillMaxSize()
             .padding(WindowInsets.systemBars.asPaddingValues())
             .padding(horizontal = 16.dp)
     ) {
+
+        //not sure what this space is but its something not in the rows
         Spacer(modifier = Modifier.height(30.dp))
 
-        // Input field and button to add a new list name
+        //this is the top row where the button and the button and input field go
+        //TODO change it so its on the top the new item
         Row(
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
         ) {
+            // Input field and button to add a new list name
+            //this is on the very top and its functionality
+            //is that it will add a new card or item on the bottom
             OutlinedTextField(
                 value = listNameText,
                 onValueChange = { listNameText = it },
@@ -78,8 +108,10 @@ fun HomeComp(navController: NavHostController, listNameViewModel: ListNameViewMo
                 modifier = Modifier.weight(1f)
             )
 
+            //this is space for the top row between the input field and the button
             Spacer(modifier = Modifier.width(20.dp))
 
+            //this is the button on the top where it adds on the right
             Button(
                 onClick = {
                     if (listNameText.isNotBlank()) {
@@ -122,12 +154,22 @@ fun ListNameCard(
     listName: ListName,
     onTrashClick: () -> Unit
 ) {
+
+    //this is for the context
     val context = LocalContext.current
 
+    //this is for knowing if it is being editied
+    //that is thje edit button was hit
     var isEditing by remember { mutableStateOf(false) }
+
     // Initialize editedText with the current listName.name.
     // This is important so the TextField has the correct value when edit mode starts.
     var editedText by remember(listName.name) { mutableStateOf(listName.name) }
+
+
+    //this is so it is rememebre through the lifcecycle and recomposes
+    var offsetX by remember { mutableFloatStateOf(0f) }
+    var offsetY by remember { mutableFloatStateOf(0f) }
 
     Card(
         shape = RoundedCornerShape(20.dp),
