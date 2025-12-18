@@ -2,6 +2,9 @@ package com.blacksnowymanx.navigation
 
 import android.widget.Toast
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.foundation.gestures.draggable
+import androidx.compose.foundation.gestures.rememberDraggableState
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -10,6 +13,7 @@ import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.width
@@ -39,11 +43,13 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.blacksnowymanx.todoincomposeversion2.R
 import com.blacksnowymanx.todoincomposeversion2.roomListNames.ListName
 import com.blacksnowymanx.todoincomposeversion2.roomListNames.ListNameViewModel
+import kotlin.math.roundToInt
 
 
 //this seems a bit redudent the homescreen is calling the homecomp
@@ -174,12 +180,23 @@ fun ListNameCard(
     Card(
         shape = RoundedCornerShape(20.dp),
         modifier = Modifier
+            //this offsets the
+            .offset { IntOffset(0, offsetY.roundToInt()) }
+            //this makes it dragable
+            .draggable(
+                orientation = Orientation.Vertical,
+                state = rememberDraggableState { delta ->
+                    offsetY += delta
+                }
+            )
             .fillMaxWidth()
             .padding(vertical = 8.dp)
-            .clickable(enabled = !isEditing) {
-                navController.navigate(Screen.Detail.passId(listName.id))
-            },
-        elevation = CardDefaults.cardElevation(6.dp),
+            .clickable(enabled = !isEditing)
+                {
+                    navController.navigate(Screen.Detail.passId(listName.id))
+                },
+            elevation = CardDefaults.cardElevation(6.dp),
+
     ) {
         Row(
             modifier = Modifier
